@@ -29,11 +29,11 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 			log.Fatalf("Error opening database file. %s", err)
 		}
 
-		flagValue, err := cmd.Flags().GetString("alias")
+		aliasFlagValue, err := cmd.Flags().GetString("alias")
 
 		sqlStatement, err := db.Prepare("INSERT INTO 'main'.'computers'('MAC_Address', 'Alias') VALUES(?, ?);")
 
-		insertEntry, err := sqlStatement.Exec(formattedMAC, flagValue)
+		insertEntry, err := sqlStatement.Exec(formattedMAC, aliasFlagValue)
 		if err != nil {
 			fmt.Printf("Error inserting data: %s", err)
 		}
