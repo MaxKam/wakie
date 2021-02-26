@@ -31,14 +31,30 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 
 		aliasFlagValue, err := cmd.Flags().GetString("alias")
 
-		sqlStatement, err := db.Prepare("INSERT INTO 'main'.'computers'('MAC_Address', 'Alias') VALUES(?, ?);")
+		insertSQLStmt, err := db.Prepare("INSERT INTO 'main'.'computers'('MAC_Address', 'Alias') VALUES(?, ?);")
 
-		insertEntry, err := sqlStatement.Exec(formattedMAC, aliasFlagValue)
+		insertEntry, err := insertSQLStmt.Exec(formattedMAC.String(), aliasFlagValue)
 		if err != nil {
-			fmt.Printf("Error inserting data: %s", err)
+			insertSQLStmt.Close()
+			if err.Error() == "UNIQUE constraint failed: computers.Alias" {
+				log.Fatalln("Error saving: Computer alias already exists in the database.")
+			} else if err.Error() == "UNIQUE constraint failed: computers.MAC_Address" {
+				log.Fatalln("Error saving: MAC Address already exists in the database.")
+			} else {
+				log.Fatalf("Error saving: %s", err)
+			}
+
 		}
 
-		fmt.Println(insertEntry)
+		dbSaveID, err := insertEntry.LastInsertId()
+		if err != nil {
+			insertSQLStmt.Close()
+			fmt.Println("Unable to get status of save to database operation")
+		}
+
+		fmt.Println(fmt.Sprintf("MAC address saved to database with ID: %d", dbSaveID))
+		insertSQLStmt.Close()
+
 	},
 }
 
