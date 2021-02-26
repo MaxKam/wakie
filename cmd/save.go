@@ -9,12 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	rootCmd.AddCommand(saveCmd)
-	saveCmd.Flags().StringP("alias", "a", "", "Alias for computer (required)")
-	saveCmd.MarkFlagRequired("alias")
-}
-
+// saveCmd represents the save command
 var saveCmd = &cobra.Command{
 	Use:   "save 'MAC Address'",
 	Short: "Saves a computer's MAC address, along with an alias for that address",
@@ -36,6 +31,11 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 		}
 
 		fmt.Println(insertEntry)
-
 	},
+}
+
+func init() {
+	rootCmd.AddCommand(saveCmd)
+	saveCmd.Flags().StringP("alias", "a", "", "Alias for computer (required)")
+	saveCmd.MarkFlagRequired("alias")
 }
