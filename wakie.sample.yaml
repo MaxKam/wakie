@@ -1,0 +1,2 @@
+db:
+  dbPath: # path to sqlite3 database file
