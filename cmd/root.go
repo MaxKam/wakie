@@ -22,12 +22,16 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Welcome to Wakie. Sending Magic Packet to %s \n", args[0])
-		packet, err := gowol.NewMagicPacket(args[0])
-		if err != nil {
-			log.Fatalln(err)
+		if len(args) == 1 {
+			fmt.Printf("Welcome to Wakie. Sending Magic Packet to %s \n", args[0])
+			packet, err := gowol.NewMagicPacket(args[0])
+			if err != nil {
+				log.Fatalln(err)
+			}
+			packet.Send("255.255.255.255")
+		} else {
+			fmt.Println("Welcome to Wakie. Please specify a MAC Address or --help flag for list of commands.")
 		}
-		packet.Send("255.255.255.255")
 	},
 }
 
@@ -63,6 +67,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".wakie" (without extension).
 		viper.AddConfigPath(home)
+		viper.AddConfigPath(".")
 		viper.SetConfigName(".wakie")
 	}
 
