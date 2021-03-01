@@ -4,9 +4,12 @@ go 1.16
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-openapi/strfmt v0.20.0 // indirect
+	github.com/jedib0t/go-pretty v4.3.0+incompatible // indirect
+	github.com/jedib0t/go-pretty/v6 v6.1.0
 	github.com/linde12/gowol v0.0.0-20180926075039-797e4d01634c
 	github.com/magiconair/properties v1.8.4 // indirect
-	github.com/mattn/go-sqlite3 v1.14.6 
+	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect
