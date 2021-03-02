@@ -17,6 +17,9 @@ import (
 
 var cfgFile string
 var dbPath string
+var idNum string
+var macAddress string
+var alias string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -24,29 +27,21 @@ var rootCmd = &cobra.Command{
 	Short: "Wake-on-LAN utility",
 	Long:  `Utility for sending Magic Packets for Wake-on-LAN, as well as managing an address book of computer MAC Addresses.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var macAddress string
-		var err error
-		if cmd.Flags().Changed("alias") {
-			aliasValue, err := cmd.Flags().GetString("alias")
-			if err != nil {
-				log.Fatalf("Error getting flag value")
-			}
-			macAddress = queryMAC("alias", aliasValue)
-			sendPacket(macAddress)
-		} else if cmd.Flags().Changed("id") {
-			aliasValue, err := cmd.Flags().GetString("id")
-			if err != nil {
-				log.Fatalf("Error getting flag value")
-			}
-			macAddress = queryMAC("ID", aliasValue)
-			sendPacket(macAddress)
-		} else if cmd.Flags().Changed("mac") {
-			macAddress, err = cmd.Flags().GetString("mac")
-			cobra.CheckErr(err)
-			sendPacket(macAddress)
-		} else {
+
+		switch {
+		case idNum != "":
+			macAddress = queryMAC("ID", idNum)
+		case alias != "":
+			macAddress = queryMAC("Alias", alias)
+		case macAddress != "":
+			// Nothing to do here since MAC address is passed in directly. Still need a case for it
+			// so that default case isn't executed, which is for nothing being passed in.
+		default:
 			fmt.Println("Welcome to Wakie. Please specify a MAC Address or --help flag for list of commands.")
+			os.Exit(1)
 		}
+
+		sendPacket(macAddress)
 	},
 }
 
@@ -64,14 +59,14 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/wakie/wakie.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.config/wakie/wakie.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&idNum, "id", "i", "", "ID of saved MAC address")
+	rootCmd.PersistentFlags().StringVarP(&macAddress, "mac", "m", "", "Manually entered MAC address")
+	rootCmd.PersistentFlags().StringVarP(&alias, "alias", "a", "", "Alias of saved MAC address")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.Flags().StringP("alias", "a", "", "Alias of saved MAC address to send magic packet to")
-	rootCmd.Flags().StringP("id", "i", "", "ID of saved MAC address to send magic packet to")
-	rootCmd.Flags().StringP("mac", "m", "", "Manually entered MAC address to send magic packet to")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -101,6 +96,7 @@ func initConfig() {
 	dbPath = viper.GetString("db.dbPath")
 }
 
+// Looks up MAC address by ID or Alias and returns address as a string
 func queryMAC(flagName, flagValue string) string {
 	fmt.Printf(" - Getting MAC Address with %s of %s\n", flagName, flagValue)
 	db, err := sql.Open("sqlite3", dbPath)
@@ -123,11 +119,12 @@ func queryMAC(flagName, flagValue string) string {
 	return macColumn
 }
 
-func sendPacket(macAddress string) {
-	packet, err := gowol.NewMagicPacket(macAddress)
+// Sends the magic packet to the specified address
+func sendPacket(targetAddress string) {
+	packet, err := gowol.NewMagicPacket(targetAddress)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	packet.Send("255.255.255.255")
-	fmt.Printf(" - Magic Packet sent to %s\n", macAddress)
+	fmt.Printf(" - Magic Packet sent to %s\n", targetAddress)
 }
