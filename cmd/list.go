@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -22,27 +23,39 @@ var listCmd = &cobra.Command{
 		}
 
 		var (
-			id         int64
-			macAddress string
-			alias      string
+			idFromDB         int64
+			macAddressFromDB string
+			aliasFromDB      string
+			dbQueryString    string
 		)
 
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"ID", "MAC Address", "Alias"})
 
-		listDB, err := db.Query("SELECT * FROM computers")
+		switch {
+		case idNum != "":
+			dbQueryString = fmt.Sprintf("SELECT * FROM computers WHERE `ID` = '%s';", idNum)
+		case alias != "":
+			dbQueryString = fmt.Sprintf("SELECT * FROM computers WHERE `Alias` = '%s';", alias)
+		case macAddress != "":
+			dbQueryString = fmt.Sprintf("SELECT * FROM computers WHERE `MAC_Address` = '%s';", macAddress)
+		default:
+			dbQueryString = "SELECT * FROM computers"
+		}
+
+		listDB, err := db.Query(dbQueryString)
 		if err != nil {
 			log.Fatalf("Unable to query database: %s", err)
 		}
 
 		defer listDB.Close()
 		for listDB.Next() {
-			err := listDB.Scan(&id, &macAddress, &alias)
+			err := listDB.Scan(&idFromDB, &macAddressFromDB, &aliasFromDB)
 			if err != nil {
 				log.Fatal(err)
 			}
-			t.AppendRow([]interface{}{id, macAddress, alias})
+			t.AppendRow([]interface{}{idFromDB, macAddressFromDB, aliasFromDB})
 			t.AppendSeparator()
 		}
 
