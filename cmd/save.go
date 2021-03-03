@@ -29,11 +29,9 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 			log.Fatalf("Error opening database file. %s", err)
 		}
 
-		aliasFlagValue, err := cmd.Flags().GetString("alias")
-
 		insertSQLStmt, err := db.Prepare("INSERT INTO 'main'.'computers'('MAC_Address', 'Alias') VALUES(?, ?);")
 
-		insertEntry, err := insertSQLStmt.Exec(formattedMAC.String(), aliasFlagValue)
+		insertEntry, err := insertSQLStmt.Exec(formattedMAC.String(), alias)
 		if err != nil {
 			insertSQLStmt.Close()
 			if err.Error() == "UNIQUE constraint failed: computers.Alias" {
@@ -60,6 +58,4 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 
 func init() {
 	rootCmd.AddCommand(saveCmd)
-	saveCmd.Flags().StringP("alias", "a", "", "Alias for computer (required)")
-	saveCmd.MarkFlagRequired("alias")
 }
