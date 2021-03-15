@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 	"os"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -79,10 +80,16 @@ var updateCmd = &cobra.Command{
 
 		// Update MAC address if updateMac flag is set
 		if newMacAddrValue != "" {
+			// First confirm valid mac address
+			newMacAddrValue, err := net.ParseMAC(newMacAddrValue)
+			if err != nil {
+				log.Fatalf("Updated MAC Address is not valid. Please double check the entered address. %s", err)
+			}
+
 			updateStmt, err := db.Prepare("UPDATE computers SET MAC_Address=? where ID=?")
 			cobra.CheckErr(err)
 
-			_, err = updateStmt.Exec(newMacAddrValue, idFromDB)
+			_, err = updateStmt.Exec(newMacAddrValue.String(), idFromDB)
 			cobra.CheckErr(err)
 
 			updateStmt.Close()
