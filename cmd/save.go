@@ -30,6 +30,9 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 		}
 
 		insertSQLStmt, err := db.Prepare("INSERT INTO 'main'.'computers'('MAC_Address', 'Alias') VALUES(?, ?);")
+		if err != nil {
+			cobra.CheckErr(err)
+		}
 
 		insertEntry, err := insertSQLStmt.Exec(formattedMAC.String(), alias)
 		if err != nil {
@@ -50,7 +53,7 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 			fmt.Println("Unable to get status of save to database operation")
 		}
 
-		fmt.Println(fmt.Sprintf(" - MAC address saved to database with ID: %d", dbSaveID))
+		fmt.Printf(" - MAC address saved to database with ID: %d", dbSaveID)
 		insertSQLStmt.Close()
 
 	},
