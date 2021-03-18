@@ -59,7 +59,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.config/wakie/wakie.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.config/wakie/wakie.yaml or app folder)")
 	rootCmd.PersistentFlags().StringVarP(&idNum, "id", "i", "", "ID of saved MAC address")
 	rootCmd.PersistentFlags().StringVarP(&macAddress, "mac", "m", "", "Manually entered MAC address")
 	rootCmd.PersistentFlags().StringVarP(&alias, "alias", "a", "", "Alias of saved MAC address")
