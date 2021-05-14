@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -28,31 +29,42 @@ fails will attempt to save config file in same folder as the app.`,
 			cfgFile = "~/.config/wakie"
 		}
 
-		if saveDbPath == "$HOME/.config/wakie/" {
+		if saveDbPath == "$HOME/.config/wakie" {
 			homeDir, err := os.UserHomeDir()
 			if err != nil {
 				log.Fatalf("Unable to get users home dir: %s", err)
 			}
 
-			saveDbPath = homeDir + "/.config/wakie/wakie.db"
+			saveDbPath = homeDir + "/.config/wakie"
 		}
-		file := dbFileExists(saveDbPath)
+		fullDbPath := saveDbPath + "/wakie.db"
 
+		file := fileExists(fullDbPath)
 		if file {
 			log.Fatal("Error - Database already exists at the supplied path")
 		}
 
-		createDB(saveDbPath)
+		fileCreateResult, err := createFile(fullDbPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf(" - Database %s\n", fileCreateResult)
+
+		err = createDbTable(fullDbPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(" - Table created in database")
 
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(setupCmd)
-	setupCmd.Flags().StringVar(&saveDbPath, "saveDb", "$HOME/.config/wakie/", "Path to folder where to save database file")
+	setupCmd.Flags().StringVar(&saveDbPath, "saveDb", "$HOME/.config/wakie", "Path to folder where to save database file")
 }
 
-func dbFileExists(path string) bool {
+func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
 		return false
@@ -61,27 +73,33 @@ func dbFileExists(path string) bool {
 	}
 }
 
-func createDB(path string) {
+func createFile(filePath string) (string, error) {
+	_, err := os.Create(filePath)
+	if err != nil {
+		errorMsg := "Failed to create file: " + err.Error()
+		return "", errors.New(errorMsg)
+	}
+	return "File created at: " + filePath, nil
+}
+
+func createDbTable(dbPath string) error {
 	createTableStmt := `CREATE TABLE 'computers' 
 	('ID' INTEGER PRIMARY KEY AUTOINCREMENT, 
     'Alias' STRING NULL UNIQUE, 
     'MAC_Address' STRING NULL UNIQUE);`
 
-	_, err := os.Create(path)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		log.Fatalf("Unable to create db file. Please make sure directory path is correct: %s", err)
-	}
-
-	db, err := sql.Open("sqlite3", path)
-	if err != nil {
-		log.Fatalf("Unable to open db file: %s", err)
+		errorMsg := "Unable to open db file: " + err.Error()
+		return errors.New(errorMsg)
 	}
 
 	_, err = db.Exec(createTableStmt)
 	if err != nil {
-		log.Fatalf("Unable to create table in db file: %s", err)
+		errorMsg := "Unable to create table in db file: " + err.Error()
+		return errors.New(errorMsg)
 	}
 
-	fmt.Println(" - database file and table successfully created.")
+	return nil
 
 }
