@@ -11,7 +11,6 @@ import (
 	_ "github.com/mattn/go-sqlite3" // Driver for sql
 
 	"github.com/linde12/gowol"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -20,6 +19,7 @@ var dbPath string
 var idNum string
 var macAddress string
 var alias string
+var homeDir string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -76,14 +76,18 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
-		home, err := homedir.Dir()
-		cobra.CheckErr(err)
-		configPath := home + "/.config/wakie"
+		var err error
+		homeDir, err = os.UserHomeDir()
+		if err != nil {
+			log.Fatalf("Unable to get users home dir: %s", err)
+		}
+		configPath := homeDir + "/.config/wakie"
 
 		// Search config in home directory with name ".wakie" (without extension).
 		viper.AddConfigPath(configPath)
 		viper.AddConfigPath(".")
 		viper.SetConfigName("wakie")
+		viper.SetConfigType("yaml")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
