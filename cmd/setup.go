@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	_ "github.com/mattn/go-sqlite3" // Driver for sql
 	// "gopkg.in/yaml.v2"
@@ -25,16 +26,9 @@ and creates a config file.
 If config flag is not set, will default to saving the config file in ~/.config/wakie. If that
 fails will attempt to save config file in same folder as the app.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if cfgFile == "" {
-			cfgFile = "~/.config/wakie"
-		}
 
+		// Check if database file already exists at specified path and creates file if not
 		if saveDbPath == "$HOME/.config/wakie" {
-			homeDir, err := os.UserHomeDir()
-			if err != nil {
-				log.Fatalf("Unable to get users home dir: %s", err)
-			}
-
 			saveDbPath = homeDir + "/.config/wakie"
 		}
 		fullDbPath := saveDbPath + "/wakie.db"
@@ -56,6 +50,17 @@ fails will attempt to save config file in same folder as the app.`,
 		}
 		fmt.Println(" - Table created in database")
 
+		// Writes out config file with path to database file once database has been created
+		if cfgFile == "" {
+			cfgFile = homeDir + "/.config/wakie/wakie.yaml"
+		}
+		viper.Set("db.dbPath", fullDbPath)
+		err = viper.WriteConfigAs(cfgFile)
+		if err != nil {
+			log.Fatalf("Error writing config file: %s", err)
+		}
+		fmt.Printf(" - config file saved at %s\n", cfgFile)
+		fmt.Println(" - Wakie is now setup and ready for use :-)")
 	},
 }
 
