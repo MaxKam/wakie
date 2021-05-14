@@ -90,8 +90,8 @@ func createFile(filePath string) (string, error) {
 func createDbTable(dbPath string) error {
 	createTableStmt := `CREATE TABLE 'computers' 
 	('ID' INTEGER PRIMARY KEY AUTOINCREMENT, 
-    'Alias' STRING NULL UNIQUE, 
-    'MAC_Address' STRING NULL UNIQUE);`
+    'MAC_Address' STRING NULL UNIQUE,
+	'Alias' STRING NULL UNIQUE);`
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
