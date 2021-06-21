@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/viper"
 
 	_ "github.com/mattn/go-sqlite3" // Driver for sql
-	// "gopkg.in/yaml.v2"
 )
 
 var saveDbPath string
