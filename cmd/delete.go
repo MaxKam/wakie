@@ -28,6 +28,7 @@ var deleteCmd = &cobra.Command{
 		var (
 			idFromDB         int64
 			macAddressFromDB string
+			ipAddressFromDB  string
 			aliasFromDB      string
 			userResponse     string
 			dbQueryString    string
@@ -36,7 +37,7 @@ var deleteCmd = &cobra.Command{
 
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{"ID", "MAC Address", "Alias"})
+		t.AppendHeader(table.Row{"ID", "MAC Address", "IP Address", "Alias"})
 
 		switch {
 		case idNum != "":
@@ -59,11 +60,11 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Unable to query database: %s", err)
 		}
-		err = listDB.Scan(&idFromDB, &macAddressFromDB, &aliasFromDB)
+		err = listDB.Scan(&idFromDB, &macAddressFromDB, &ipAddressFromDB, &aliasFromDB)
 		if err != nil {
 			log.Fatal(err)
 		}
-		t.AppendRow([]interface{}{idFromDB, macAddressFromDB, aliasFromDB})
+		t.AppendRow([]interface{}{idFromDB, macAddressFromDB, ipAddressFromDB, aliasFromDB})
 		t.AppendSeparator()
 		fmt.Println("Entry to be deleted:")
 		t.Render()
