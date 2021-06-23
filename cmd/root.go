@@ -132,6 +132,11 @@ func sendPacket(targetMacAddress, targetIPAddress string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	packet.Send(targetIPAddress)
+
+	err = packet.Send(targetIPAddress)
+	if err != nil {
+		log.Fatal("Error sending magic packet")
+	}
+
 	fmt.Printf(" - Magic Packet sent to %s\n", targetMacAddress)
 }
