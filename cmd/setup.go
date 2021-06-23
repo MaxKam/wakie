@@ -86,10 +86,14 @@ func createFile(filePath string) (string, error) {
 	return "File created at: " + filePath, nil
 }
 
+// Note that IP address column isn't required to be unique. This is because user might have computers on different networks
+// with the same IP address. Since this is the case, Wakie supports listing entries by IP but does not support using IP to select entry
+// to send magic packet to.
 func createDbTable(dbPath string) error {
 	createTableStmt := `CREATE TABLE 'computers' 
 	('ID' INTEGER PRIMARY KEY AUTOINCREMENT, 
     'MAC_Address' STRING NULL UNIQUE,
+	'IP_Address' STRING NULL,
 	'Alias' STRING NULL UNIQUE);`
 
 	db, err := sql.Open("sqlite3", dbPath)
