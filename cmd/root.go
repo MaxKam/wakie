@@ -18,6 +18,7 @@ var cfgFile string
 var dbPath string
 var idNum string
 var macAddress string
+var ipAddress string
 var alias string
 var homeDir string
 
@@ -30,18 +31,18 @@ var rootCmd = &cobra.Command{
 
 		switch {
 		case idNum != "":
-			macAddress = queryMAC("ID", idNum)
+			macAddress, ipAddress = queryMAC("ID", idNum)
 		case alias != "":
-			macAddress = queryMAC("Alias", alias)
+			macAddress, ipAddress = queryMAC("Alias", alias)
 		case macAddress != "":
 			// Nothing to do here since MAC address is passed in directly. Still need a case for it
-			// so that default case isn't executed, which is for nothing being passed in.
+			// so that default case isn't executed, which is for no flags being passed in.
 		default:
 			fmt.Println("Welcome to Wakie. Please specify a MAC Address or --help flag for list of commands.")
 			os.Exit(1)
 		}
 
-		sendPacket(macAddress)
+		sendPacket(macAddress, ipAddress)
 	},
 }
 
@@ -62,6 +63,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.config/wakie/wakie.yaml or app folder)")
 	rootCmd.PersistentFlags().StringVarP(&idNum, "id", "i", "", "ID of saved MAC address")
 	rootCmd.PersistentFlags().StringVarP(&macAddress, "mac", "m", "", "Manually entered MAC address")
+	rootCmd.PersistentFlags().StringVar(&ipAddress, "ip", "255.255.255.255", "IP address of MAC address. Needed in case host is connected to multiple networks.")
 	rootCmd.PersistentFlags().StringVarP(&alias, "alias", "a", "", "Alias of saved MAC address")
 
 	// Cobra also supports local flags, which will only run
@@ -100,8 +102,8 @@ func initConfig() {
 	dbPath = viper.GetString("db.dbPath")
 }
 
-// Looks up MAC address by ID or Alias and returns address as a string
-func queryMAC(flagName, flagValue string) string {
+// Looks up MAC address by ID or Alias and returns MAC and IP address as a string
+func queryMAC(flagName, flagValue string) (string, string) {
 	fmt.Printf(" - Getting MAC Address with %s of %s\n", flagName, flagValue)
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -110,25 +112,26 @@ func queryMAC(flagName, flagValue string) string {
 
 	var idColumn string
 	var macColumn string
+	var ipColumn string
 	var aliasColumn string
 
 	querySQLStmt := fmt.Sprintf("SELECT * FROM computers WHERE `%s` = '%s';", flagName, flagValue)
 
 	queryResult := db.QueryRow(querySQLStmt)
-	err = queryResult.Scan(&idColumn, &macColumn, &aliasColumn)
+	err = queryResult.Scan(&idColumn, &macColumn, &ipColumn, &aliasColumn)
 	if err != nil {
 		log.Fatalf("Unable to find MAC with %s of %s", flagName, flagValue)
 	}
 
-	return macColumn
+	return macColumn, ipColumn
 }
 
 // Sends the magic packet to the specified address
-func sendPacket(targetAddress string) {
-	packet, err := gowol.NewMagicPacket(targetAddress)
+func sendPacket(targetMacAddress, targetIPAddress string) {
+	packet, err := gowol.NewMagicPacket(targetMacAddress)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	packet.Send("255.255.255.255")
-	fmt.Printf(" - Magic Packet sent to %s\n", targetAddress)
+	packet.Send(targetIPAddress)
+	fmt.Printf(" - Magic Packet sent to %s\n", targetMacAddress)
 }
