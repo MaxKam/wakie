@@ -14,14 +14,20 @@ import (
 // saveCmd represents the save command
 var saveCmd = &cobra.Command{
 	Use:   "save 'MAC Address'",
-	Short: "Saves a computer's MAC address, along with an alias for that address",
-	Long: `Saves a computer's MAC address, giving it a unique ID, along with an alias for that address.
-Wakie can use either alias or ID to lookup saved MAC Address`,
+	Short: "Saves a computer's MAC address, along with an alias and IP address for that MAC",
+	Long: `Saves a computer's MAC address, giving it a unique ID, along with an alias and IP address for that MAC address.
+Wakie can use alias, ID or IP address to lookup saved MAC Address.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// First validate that MAC address is in the correct format
 		formattedMAC, err := net.ParseMAC(args[0])
 		if err != nil {
-			log.Fatalf("Error validating MAC address. Please double check the address entered. \n %s", err)
+			log.Fatalf("Error validating MAC address. Please double check entered MAC address. \n %s", err)
+		}
+
+		// Also validate that IP address is in the correct format
+		formattedIP := net.ParseIP(ipAddress)
+		if formattedIP == nil {
+			log.Fatal("Error validating IP address. Please double check entered IP address.")
 		}
 
 		db, err := sql.Open("sqlite3", dbPath)
@@ -29,12 +35,12 @@ Wakie can use either alias or ID to lookup saved MAC Address`,
 			log.Fatalf("Error opening database file. %s", err)
 		}
 
-		insertSQLStmt, err := db.Prepare("INSERT INTO 'main'.'computers'('MAC_Address', 'Alias') VALUES(?, ?);")
+		insertSQLStmt, err := db.Prepare("INSERT INTO 'main'.'computers'('MAC_Address', 'IP_Address', 'Alias') VALUES(?, ?, ?);")
 		if err != nil {
 			cobra.CheckErr(err)
 		}
 
-		insertEntry, err := insertSQLStmt.Exec(formattedMAC.String(), alias)
+		insertEntry, err := insertSQLStmt.Exec(formattedMAC.String(), formattedIP.String(), alias)
 		if err != nil {
 			insertSQLStmt.Close()
 			if err.Error() == "UNIQUE constraint failed: computers.Alias" {
