@@ -91,7 +91,7 @@ func createFile(filePath string) (string, error) {
 // to send magic packet to.
 func createDbTable(dbPath string) error {
 	createTableStmt := `CREATE TABLE 'computers' 
-	('ID' INTEGER PRIMARY KEY AUTOINCREMENT, 
+	('ID' INTEGER PRIMARY KEY, 
     'MAC_Address' STRING NULL UNIQUE,
 	'IP_Address' STRING NULL,
 	'Alias' STRING NULL UNIQUE);`
