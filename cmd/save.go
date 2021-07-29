@@ -59,7 +59,7 @@ Wakie can use alias, ID or IP address to lookup saved MAC Address.`,
 			fmt.Println("Unable to get status of save to database operation")
 		}
 
-		fmt.Printf(" - MAC address saved to database with ID: %d", dbSaveID)
+		fmt.Printf(" - MAC address saved to database with ID: %d\n", dbSaveID)
 		insertSQLStmt.Close()
 
 	},
