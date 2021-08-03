@@ -1,3 +1,3 @@
-# <div align="center"> Wakie </div>
+# <div align="center"> <img src="https://github.com/MaxKam/wakie/blob/master/wakielogo.png" alt="wakie logo"/>  </div>
 
- #### Utility for sending Magic Packets for Wake-on-LAN, as well as managing an address book of computer MAC Addresses.
+ #### Utility for sending Wake-on-LAN magic packets, as well as managing an address book of computer MAC Addresses.
