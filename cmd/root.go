@@ -103,7 +103,7 @@ func initConfig() {
 	dbPath = viper.GetString("db.dbPath")
 }
 
-// Looks up MAC address by ID or Alias and returns MAC and IP address as a string
+// queryMAC looks up MAC address by ID or Alias and returns MAC and IP address as a string
 func queryMAC(flagName, flagValue string) (string, string) {
 	fmt.Printf(" - Getting MAC Address with %s of %s\n", flagName, flagValue)
 	db, err := sql.Open("sqlite3", dbPath)
@@ -127,7 +127,7 @@ func queryMAC(flagName, flagValue string) (string, string) {
 	return macColumn, ipColumn
 }
 
-// Sends the magic packet to the specified address
+// sendPacket sends the magic packet to the specified address
 func sendPacket(targetMacAddress, targetIPAddress string) {
 	packet, err := gowol.NewMagicPacket(targetMacAddress)
 	if err != nil {
