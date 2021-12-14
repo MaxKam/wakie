@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/TwiN/go-color"
 	"github.com/spf13/cobra"
 
 	_ "github.com/mattn/go-sqlite3" // Driver for sql
@@ -38,7 +39,7 @@ var rootCmd = &cobra.Command{
 			// Nothing to do here since MAC address is passed in directly. Still need a case for it
 			// so that default case isn't executed, which is for no flags being passed in.
 		default:
-			fmt.Println("Welcome to Wakie. Please specify a MAC Address or --help flag for list of commands.")
+			fmt.Println(color.Ize(color.Bold, "Welcome to Wakie. Please specify a MAC Address or --help flag for list of commands."))
 			os.Exit(1)
 		}
 
@@ -53,7 +54,7 @@ func Execute() {
 }
 
 func init() {
-	fmt.Println("Wakie:")
+	fmt.Println(color.Ize(color.Bold, "Wakie:"))
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
