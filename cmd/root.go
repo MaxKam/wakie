@@ -25,9 +25,10 @@ var homeDir string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "wakie",
-	Short: "Wake-on-LAN utility",
-	Long:  `Utility for sending Magic Packets for Wake-on-LAN, as well as managing an address book of computer MAC Addresses.`,
+	Version: "1.2.2",
+	Use:     "wakie",
+	Short:   "Wake-on-LAN utility",
+	Long:    `Utility for sending Magic Packets for Wake-on-LAN, as well as managing an address book of computer MAC Addresses.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		switch {
