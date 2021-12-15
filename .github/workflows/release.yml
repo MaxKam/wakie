@@ -1,0 +1,35 @@
+# Creates a release whenever a new tag is pushed to the repository.
+on: 
+  push:
+    tags: 
+      - 'v*'
+name: New Release
+jobs:
+  new-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17.x
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Build_Linux
+      working-directory: ./
+      run: go build -v -o wakie-Linux-x64
+    - name: Build_Windows
+      working-directory: ./
+      run: GOOS=windows GOARCH=amd64 go build -v -o wakie-Win-x64.exe
+    - name: Create Archive
+      working-directory: ./
+      run: |
+        tar -cvzf wakie-Linux-x64.tar.gz wakie-Linux-x64 wakie.sample.yaml
+        zip wakie-Win-x64 wakie-Win-x64.exe wakie.sample.yaml 
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          wakie-Linux-x64.tar.gz
+          wakie-Win-x64.zip
+        draft: false
+        prerelease: false
